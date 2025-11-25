@@ -1,0 +1,30 @@
+# Fichiers Python générés
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environnements virtuels
+env/
+venv/
+.venv/
+
+# Configs d'IDE
+.vscode/
+.idea/
+
+# Fichiers temporaires
+*.log
+*.tmp
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Gurobi : éviter de versionner les licences locales
+gurobi.lic
+gurobi.log
+gurobi_debug.log
+
+# OS specific trash
+.DS_Store
+Thumbs.db
