@@ -29,6 +29,7 @@ import {
     CheckCircle,
     XCircle,
     Loader2,
+    Terminal,
 } from "lucide-react";
 import { mockEmployees } from "@/lib/mock-data";
 import {
@@ -121,6 +122,7 @@ export default function SchedulesPage() {
                             : "No feasible solution exists",
                 });
             }
+            // If status is QUEUED or RUNNING, keep polling (isOptimizing stays true)
         }
     }, [polledResult]);
 
@@ -330,6 +332,13 @@ export default function SchedulesPage() {
                                                 <BarChart3 className="h-4 w-4" />
                                                 Analytics
                                             </TabsTrigger>
+                                            <TabsTrigger
+                                                value="logs"
+                                                className="gap-2"
+                                            >
+                                                <Terminal className="h-4 w-4" />
+                                                Solver Logs
+                                            </TabsTrigger>
                                         </TabsList>
                                         <TabsContent
                                             value="calendar"
@@ -432,6 +441,38 @@ export default function SchedulesPage() {
                                                     </CardContent>
                                                 </Card>
                                             )}
+                                        </TabsContent>
+                                        <TabsContent
+                                            value="logs"
+                                            className="mt-4"
+                                        >
+                                            <Card className="bg-muted/50">
+                                                <CardHeader>
+                                                    <CardTitle className="text-sm font-medium">
+                                                        Optimization Logs
+                                                    </CardTitle>
+                                                    <CardDescription>
+                                                        Detailed output from the
+                                                        Gurobi solver
+                                                    </CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className="h-[400px] w-full rounded-md border bg-black p-4 overflow-auto font-mono text-xs text-green-400">
+                                                        {selectedSchedule.logs ? (
+                                                            <pre className="whitespace-pre-wrap">
+                                                                {
+                                                                    selectedSchedule.logs
+                                                                }
+                                                            </pre>
+                                                        ) : (
+                                                            <div className="flex h-full items-center justify-center text-muted-foreground">
+                                                                No logs
+                                                                available
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
                                         </TabsContent>
                                     </Tabs>
                                 </>

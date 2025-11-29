@@ -62,6 +62,15 @@ export default function DashboardPage() {
     useEffect(() => {
         if (polledResult) {
             setScheduleResult(polledResult);
+
+            // Check if optimization is complete (any terminal status)
+            const isComplete = [
+                "OPTIMAL",
+                "FEASIBLE",
+                "ERROR",
+                "INFEASIBLE",
+            ].includes(polledResult.status);
+
             if (
                 polledResult.status === "OPTIMAL" ||
                 polledResult.status === "FEASIBLE"

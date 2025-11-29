@@ -34,6 +34,8 @@ export interface ScheduleRequest {
     solver_time_limit: number;
     allow_uncovered_demand: boolean;
     penalty_uncovered: number;
+    weight_preference: number;
+    max_consecutive_days: number;
 }
 
 export interface Assignment {
@@ -58,7 +60,7 @@ export interface ScheduleResult {
         | "ERROR";
     objective_value?: number;
     assignments?: Assignment[];
-    logs?: string[];
+    logs?: string;
     created_at?: string;
     completed_at?: string;
 }

@@ -61,6 +61,8 @@ class SolveRequest(BaseModel):
     solver_time_limit: int = 60
     allow_uncovered_demand: bool = True
     penalty_uncovered: float = 1000.0
+    weight_preference: float = 50.0
+    max_consecutive_days: int = 5
 
 class RunResponse(BaseModel):
     run_id: str
