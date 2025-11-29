@@ -63,6 +63,8 @@ class SolveRequest(BaseModel):
     penalty_uncovered: float = 1000.0
     weight_preference: float = 50.0
     max_consecutive_days: int = 5
+    min_rest_hours: float = 11.0
+    max_night_shifts: int = 3
 
 class RunResponse(BaseModel):
     run_id: str

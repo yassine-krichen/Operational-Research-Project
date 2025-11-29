@@ -36,6 +36,8 @@ export interface ScheduleRequest {
     penalty_uncovered: number;
     weight_preference: number;
     max_consecutive_days: number;
+    min_rest_hours: number;
+    max_night_shifts: number;
 }
 
 export interface Assignment {

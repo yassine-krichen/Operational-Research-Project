@@ -197,12 +197,13 @@ class GurobiScheduler:
             )
             m.addConstr(total_hours <= e.max_weekly_hours, name=f"max_hours_{e.employee_id}")
 
-        # C4: Minimum Rest Time (11h rule) & Forward Rotation
+            # C4: Minimum Rest Time (11h rule) & Forward Rotation
         # We iterate adjacent days.
-        # Forbidden: Shift A (Day T) -> Shift B (Day T+1) if gap < 11h
+        # Forbidden: Shift A (Day T) -> Shift B (Day T+1) if gap < min_rest
         # ALSO Forbidden: Night -> Morning (Forward Rotation Rule)
         
         # Precompute forbidden pairs (s1, s2)
+        min_rest = self.params.min_rest_hours
         forbidden_pairs = set()
         for s1 in self.shifts:
             for s2 in self.shifts:
@@ -216,10 +217,8 @@ class GurobiScheduler:
                 
                 gap = (24 - t1_end) + t2_start
                 
-                if gap < 11.0:
-                    forbidden_pairs.add((s1.shift_id, s2.shift_id))
-                
-                # 2. Forward Rotation Rule: Night -> Morning is forbidden
+                if gap < min_rest:
+                    forbidden_pairs.add((s1.shift_id, s2.shift_id))                # 2. Forward Rotation Rule: Night -> Morning is forbidden
                 # Even if gap >= 11 (e.g. Night ends 7am, Morning starts 7pm? Unlikely but logic holds)
                 # Usually Night ends 7am, Morning starts 7am next day -> 24h gap. 
                 # But "Night -> Morning" usually means Night (Day T) -> Morning (Day T+1).
@@ -292,6 +291,24 @@ class GurobiScheduler:
                     if seniors or juniors:
                         m.addConstr(gp.quicksum(seniors) >= gp.quicksum(juniors), 
                                     name=f"ratio_icu_{t_str}_{s.shift_id}")
+
+        # C7: Max Night Shifts per Employee
+        # Sum(Night Shifts) <= MAX_NIGHTS
+        MAX_NIGHTS = self.params.max_night_shifts
+        night_shifts = [s for s in self.shifts if s.shift_type.lower() == "night"]
+        
+        if night_shifts:
+            for e in self.employees:
+                night_vars = []
+                for t in self.dates:
+                    t_str = t.strftime("%Y-%m-%d")
+                    for s in night_shifts:
+                        if (e.employee_id, t_str, s.shift_id) in self.x:
+                            night_vars.append(self.x[(e.employee_id, t_str, s.shift_id)])
+                
+                if night_vars:
+                    m.addConstr(gp.quicksum(night_vars) <= MAX_NIGHTS, 
+                                name=f"max_nights_{e.employee_id}")
 
     def _add_soft_constraints(self):
         """

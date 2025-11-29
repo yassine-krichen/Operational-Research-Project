@@ -47,6 +47,8 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
     const [penaltyUncovered, setPenaltyUncovered] = useState(1000);
     const [weightPreference, setWeightPreference] = useState(50);
     const [maxConsecutiveDays, setMaxConsecutiveDays] = useState(5);
+    const [minRestHours, setMinRestHours] = useState(11);
+    const [maxNightShifts, setMaxNightShifts] = useState(3);
 
     const steps = [
         {
@@ -72,6 +74,8 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
             penalty_uncovered: penaltyUncovered,
             weight_preference: weightPreference,
             max_consecutive_days: maxConsecutiveDays,
+            min_rest_hours: minRestHours,
+            max_night_shifts: maxNightShifts,
         });
     };
 
@@ -222,6 +226,40 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
+                                    <Label>Min Rest Hours</Label>
+                                    <span className="text-sm font-medium text-foreground">
+                                        {minRestHours}h
+                                    </span>
+                                </div>
+                                <Slider
+                                    value={[minRestHours]}
+                                    onValueChange={([v]) => setMinRestHours(v)}
+                                    min={8}
+                                    max={24}
+                                    step={1}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <Label>Max Night Shifts</Label>
+                                    <span className="text-sm font-medium text-foreground">
+                                        {maxNightShifts}
+                                    </span>
+                                </div>
+                                <Slider
+                                    value={[maxNightShifts]}
+                                    onValueChange={([v]) =>
+                                        setMaxNightShifts(v)
+                                    }
+                                    min={0}
+                                    max={7}
+                                    step={1}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
                                     <Label>Preference Weight</Label>
                                     <span className="text-sm font-medium text-foreground">
                                         {weightPreference}
@@ -333,6 +371,22 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
                                     </span>
                                     <span className="text-sm font-medium">
                                         {maxConsecutiveDays} days
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">
+                                        Min Rest
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                        {minRestHours}h
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">
+                                        Max Night Shifts
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                        {maxNightShifts}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
