@@ -228,15 +228,19 @@ class GurobiScheduler:
             else:
                 run_record.status = f"ERROR_{status_code}"
             
+            # Set completion timestamp
+            run_record.completed_at = datetime.utcnow()
             self.db.commit()
 
         except gp.GurobiError as e:
             self.log(f"Gurobi Error: {e}")
             run_record.status = "ERROR"
+            run_record.completed_at = datetime.utcnow()
             run_record.logs = "\n".join(self.log_buffer)
             self.db.commit()
         except Exception as e:
             self.log(f"System Error: {e}")
             run_record.status = "ERROR"
+            run_record.completed_at = datetime.utcnow()
             run_record.logs = "\n".join(self.log_buffer)
             self.db.commit()

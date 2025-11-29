@@ -35,6 +35,7 @@ class ScheduleRun(Base):
     __tablename__ = "runs"
     run_id = Column(String, primary_key=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
     status = Column(String) # QUEUED, PROCESSING, OPTIMAL, INFEASIBLE, ERROR
     horizon_start = Column(Date)
     horizon_days = Column(Integer)
