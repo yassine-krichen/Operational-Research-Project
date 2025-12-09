@@ -310,6 +310,46 @@ class GurobiScheduler:
                     m.addConstr(gp.quicksum(night_vars) <= MAX_NIGHTS, 
                                 name=f"max_nights_{e.employee_id}")
 
+        # C8: Minimum Shifts per Employee (Fairness)
+        MIN_SHIFTS = self.params.min_shifts_per_employee
+        if MIN_SHIFTS > 0:
+            for e in self.employees:
+                total_shifts = []
+                for t in self.dates:
+                    t_str = t.strftime("%Y-%m-%d")
+                    for s in self.shifts:
+                        if (e.employee_id, t_str, s.shift_id) in self.x:
+                            total_shifts.append(self.x[(e.employee_id, t_str, s.shift_id)])
+                
+                if total_shifts:
+                    m.addConstr(gp.quicksum(total_shifts) >= MIN_SHIFTS, 
+                                name=f"min_shifts_{e.employee_id}")
+
+        # C9: Complete Weekends (If working Sat, must work Sun)
+        if self.params.require_complete_weekends:
+            for t in self.dates:
+                if t.weekday() == 5: # Saturday
+                    t_sat_str = t.strftime("%Y-%m-%d")
+                    t_sun = t + timedelta(days=1)
+                    t_sun_str = t_sun.strftime("%Y-%m-%d")
+                    
+                    # Only enforce if Sunday is also in the horizon
+                    if t_sun in self.dates:
+                        for e in self.employees:
+                            sat_vars = []
+                            sun_vars = []
+                            
+                            for s in self.shifts:
+                                if (e.employee_id, t_sat_str, s.shift_id) in self.x:
+                                    sat_vars.append(self.x[(e.employee_id, t_sat_str, s.shift_id)])
+                                if (e.employee_id, t_sun_str, s.shift_id) in self.x:
+                                    sun_vars.append(self.x[(e.employee_id, t_sun_str, s.shift_id)])
+                            
+                            # Sum(Sat) == Sum(Sun). Since max 1 shift/day, this means 0==0 or 1==1
+                            if sat_vars and sun_vars:
+                                m.addConstr(gp.quicksum(sat_vars) == gp.quicksum(sun_vars),
+                                            name=f"complete_weekend_{e.employee_id}_{t_sat_str}")
+
     def _add_soft_constraints(self):
         """
         Add soft constraints (Preferences) by adding terms to the objective function later,

@@ -49,6 +49,9 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
     const [maxConsecutiveDays, setMaxConsecutiveDays] = useState(5);
     const [minRestHours, setMinRestHours] = useState(11);
     const [maxNightShifts, setMaxNightShifts] = useState(3);
+    const [minShiftsPerEmployee, setMinShiftsPerEmployee] = useState(2);
+    const [requireCompleteWeekends, setRequireCompleteWeekends] =
+        useState(false);
 
     const steps = [
         {
@@ -76,6 +79,8 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
             max_consecutive_days: maxConsecutiveDays,
             min_rest_hours: minRestHours,
             max_night_shifts: maxNightShifts,
+            min_shifts_per_employee: minShiftsPerEmployee,
+            require_complete_weekends: requireCompleteWeekends,
         });
     };
 
@@ -260,6 +265,39 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
+                                    <Label>Min Shifts per Employee</Label>
+                                    <span className="text-sm font-medium text-foreground">
+                                        {minShiftsPerEmployee}
+                                    </span>
+                                </div>
+                                <Slider
+                                    value={[minShiftsPerEmployee]}
+                                    onValueChange={([v]) =>
+                                        setMinShiftsPerEmployee(v)
+                                    }
+                                    min={0}
+                                    max={5}
+                                    step={1}
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <Label className="flex items-center gap-2">
+                                        Complete Weekends
+                                    </Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        If working Sat or Sun, must work both
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={requireCompleteWeekends}
+                                    onCheckedChange={setRequireCompleteWeekends}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
                                     <Label>Preference Weight</Label>
                                     <span className="text-sm font-medium text-foreground">
                                         {weightPreference}
@@ -387,6 +425,22 @@ export function ScheduleWizard({ onSubmit, onCancel }: ScheduleWizardProps) {
                                     </span>
                                     <span className="text-sm font-medium">
                                         {maxNightShifts}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">
+                                        Min Shifts/Emp
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                        {minShiftsPerEmployee}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-muted-foreground">
+                                        Complete Weekends
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                        {requireCompleteWeekends ? "Yes" : "No"}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">

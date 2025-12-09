@@ -65,6 +65,8 @@ class SolveRequest(BaseModel):
     max_consecutive_days: int = 5
     min_rest_hours: float = 11.0
     max_night_shifts: int = 3
+    min_shifts_per_employee: int = 0
+    require_complete_weekends: bool = False
 
 class RunResponse(BaseModel):
     run_id: str

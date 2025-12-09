@@ -38,6 +38,8 @@ export interface ScheduleRequest {
     max_consecutive_days: number;
     min_rest_hours: number;
     max_night_shifts: number;
+    min_shifts_per_employee: number;
+    require_complete_weekends: boolean;
 }
 
 export interface Assignment {
