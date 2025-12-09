@@ -4,11 +4,12 @@ from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QTabWidget, QPushButton, QLabel, QFormLayout, 
                              QSpinBox, QDateEdit, QCheckBox, QDoubleSpinBox, 
                              QTextEdit, QProgressBar, QMessageBox, QTableWidget, 
-                             QTableWidgetItem, QHeaderView)
+                             QTableWidgetItem, QHeaderView, QGroupBox, QScrollArea)
 from PyQt6.QtCore import Qt, QDate
 from .worker import SolverWorker
 from .views.data_view import DataView
 from .views.schedule_view import ScheduleView
+from .views.demands_view import DemandsView
 from hospital_scheduler.app.schemas import SolveRequest
 from hospital_scheduler.app.database import SessionLocal
 from hospital_scheduler.app.models import ScheduleRun
@@ -32,7 +33,14 @@ class HospitalSchedulerWindow(QMainWindow):
         self.tab_data = DataView()
         self.tabs.addTab(self.tab_data, "Data Management")
         
-        # Tab 2: New Schedule
+        # Tab 2: Demands
+        self.tab_demands = DemandsView()
+        self.tabs.addTab(self.tab_demands, "Demands")
+        
+        # Connect signals
+        self.tab_data.data_changed.connect(self.tab_demands.refresh_data)
+        
+        # Tab 3: New Schedule
         self.tab_new = QWidget()
         self.setup_new_schedule_tab()
         self.tabs.addTab(self.tab_new, "New Schedule")
@@ -55,55 +63,130 @@ class HospitalSchedulerWindow(QMainWindow):
         self.worker = None
 
     def setup_new_schedule_tab(self):
-        layout = QVBoxLayout(self.tab_new)
+        # Scroll Area for smaller screens
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        content_widget = QWidget()
+        scroll.setWidget(content_widget)
         
-        # Form
-        form_layout = QFormLayout()
+        main_layout = QVBoxLayout(self.tab_new)
+        main_layout.addWidget(scroll)
+        
+        layout = QVBoxLayout(content_widget)
+        layout.setSpacing(20)
+        
+        # --- Section 1: Schedule Parameters ---
+        grp_params = QGroupBox("📅 Schedule Parameters")
+        grp_params.setStyleSheet("QGroupBox { font-weight: bold; font-size: 14px; }")
+        layout_params = QFormLayout(grp_params)
+        layout_params.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         
         self.date_start = QDateEdit()
         self.date_start.setDate(QDate.currentDate())
         self.date_start.setCalendarPopup(True)
-        form_layout.addRow("Start Date:", self.date_start)
+        self.add_form_row(layout_params, "Start Date:", self.date_start, "The first day of the schedule.")
         
         self.spin_days = QSpinBox()
         self.spin_days.setRange(1, 28)
         self.spin_days.setValue(7)
-        form_layout.addRow("Horizon (Days):", self.spin_days)
+        self.add_form_row(layout_params, "Horizon (Days):", self.spin_days, "Duration of the schedule (e.g., 7 days, 14 days).")
+        
+        layout.addWidget(grp_params)
+
+        # --- Section 2: Solver Configuration ---
+        grp_solver = QGroupBox("⚙️ Solver Configuration")
+        grp_solver.setStyleSheet("QGroupBox { font-weight: bold; font-size: 14px; }")
+        layout_solver = QFormLayout(grp_solver)
+        layout_solver.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         
         self.spin_time_limit = QSpinBox()
         self.spin_time_limit.setRange(10, 600)
         self.spin_time_limit.setValue(60)
-        form_layout.addRow("Solver Time Limit (s):", self.spin_time_limit)
+        self.add_form_row(layout_solver, "Time Limit (s):", self.spin_time_limit, "Max time for Gurobi to find a solution.")
         
-        self.check_uncovered = QCheckBox()
+        self.check_uncovered = QCheckBox("Allow Uncovered Demand")
         self.check_uncovered.setChecked(True)
-        form_layout.addRow("Allow Uncovered Demand:", self.check_uncovered)
+        self.check_uncovered.setToolTip("If checked, the solver can leave shifts empty (with a penalty) if no staff is available.")
+        layout_solver.addRow("", self.check_uncovered)
         
+        self.spin_penalty = QDoubleSpinBox()
+        self.spin_penalty.setRange(0, 10000)
+        self.spin_penalty.setValue(1000)
+        self.add_form_row(layout_solver, "Uncovered Penalty:", self.spin_penalty, "Cost added to objective for each missing shift.")
+
+        self.spin_weight_pref = QDoubleSpinBox()
+        self.spin_weight_pref.setRange(0, 1000)
+        self.spin_weight_pref.setValue(50)
+        self.add_form_row(layout_solver, "Preference Weight:", self.spin_weight_pref, "Penalty for ignoring employee 'avoid' requests.")
+        
+        layout.addWidget(grp_solver)
+
+        # --- Section 3: Work Rules ---
+        grp_rules = QGroupBox("⚖️ Work Rules & Constraints")
+        grp_rules.setStyleSheet("QGroupBox { font-weight: bold; font-size: 14px; }")
+        layout_rules = QFormLayout(grp_rules)
+        layout_rules.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        
+        self.spin_consecutive = QSpinBox()
+        self.spin_consecutive.setRange(1, 14)
+        self.spin_consecutive.setValue(5)
+        self.add_form_row(layout_rules, "Max Consecutive Days:", self.spin_consecutive, "Max days an employee can work in a row.")
+
         self.spin_min_rest = QDoubleSpinBox()
         self.spin_min_rest.setRange(0, 24)
         self.spin_min_rest.setValue(11)
-        form_layout.addRow("Min Rest Hours:", self.spin_min_rest)
+        self.add_form_row(layout_rules, "Min Rest Hours:", self.spin_min_rest, "Minimum hours between shifts (e.g., 11h).")
 
         self.spin_max_night = QSpinBox()
+        self.spin_max_night.setRange(0, 7)
         self.spin_max_night.setValue(3)
-        form_layout.addRow("Max Night Shifts:", self.spin_max_night)
+        self.add_form_row(layout_rules, "Max Night Shifts:", self.spin_max_night, "Max night shifts per employee in the horizon.")
+        
+        layout.addWidget(grp_rules)
+
+        # --- Section 4: Fairness & Policy ---
+        grp_fairness = QGroupBox("🤝 Fairness & Policy")
+        grp_fairness.setStyleSheet("QGroupBox { font-weight: bold; font-size: 14px; }")
+        layout_fairness = QFormLayout(grp_fairness)
+        layout_fairness.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
 
         self.spin_min_shifts = QSpinBox()
+        self.spin_min_shifts.setRange(0, 7)
         self.spin_min_shifts.setValue(2)
-        form_layout.addRow("Min Shifts per Employee:", self.spin_min_shifts)
+        self.add_form_row(layout_fairness, "Min Shifts/Employee:", self.spin_min_shifts, "Ensure everyone gets at least this many shifts.")
 
-        self.check_weekends = QCheckBox()
-        form_layout.addRow("Require Complete Weekends:", self.check_weekends)
+        self.check_weekends = QCheckBox("Require Complete Weekends")
+        self.check_weekends.setToolTip("If an employee works Saturday, they must work Sunday (and vice versa).")
+        layout_fairness.addRow("", self.check_weekends)
         
-        layout.addLayout(form_layout)
+        layout.addWidget(grp_fairness)
         
         # Action Button
-        self.btn_run = QPushButton("Generate Schedule")
-        self.btn_run.setStyleSheet("background-color: #2563eb; color: white; padding: 10px; font-weight: bold;")
+        self.btn_run = QPushButton("🚀 Generate Schedule")
+        self.btn_run.setStyleSheet("""
+            QPushButton {
+                background-color: #2563eb; 
+                color: white; 
+                padding: 12px; 
+                font-weight: bold;
+                font-size: 16px;
+                border-radius: 6px;
+            }
+            QPushButton:hover { background-color: #1d4ed8; }
+            QPushButton:disabled { background-color: #9ca3af; }
+        """)
         self.btn_run.clicked.connect(self.run_solver)
         layout.addWidget(self.btn_run)
         
         layout.addStretch()
+
+    def add_form_row(self, layout, label_text, widget, tooltip):
+        """Helper to add a row with a label, widget, and tooltip."""
+        widget.setToolTip(tooltip)
+        # Create a label with a help icon or just tooltip on hover
+        lbl = QLabel(label_text)
+        lbl.setToolTip(tooltip)
+        layout.addRow(lbl, widget)
 
     def setup_results_tab(self):
         layout = QVBoxLayout(self.tab_results)
@@ -140,6 +223,9 @@ class HospitalSchedulerWindow(QMainWindow):
                 horizon_days=self.spin_days.value(),
                 solver_time_limit=self.spin_time_limit.value(),
                 allow_uncovered_demand=self.check_uncovered.isChecked(),
+                penalty_uncovered=self.spin_penalty.value(),
+                weight_preference=self.spin_weight_pref.value(),
+                max_consecutive_days=self.spin_consecutive.value(),
                 min_rest_hours=self.spin_min_rest.value(),
                 max_night_shifts=self.spin_max_night.value(),
                 min_shifts_per_employee=self.spin_min_shifts.value(),

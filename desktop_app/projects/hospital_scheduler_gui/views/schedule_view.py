@@ -1,10 +1,11 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, 
-                             QHeaderView, QLabel, QComboBox, QHBoxLayout)
+                             QHeaderView, QLabel, QComboBox, QHBoxLayout, QSplitter)
 from PyQt6.QtGui import QColor, QBrush
 from PyQt6.QtCore import Qt
 from datetime import timedelta
 from hospital_scheduler.app.database import SessionLocal
 from hospital_scheduler.app.models import ScheduleRun, Assignment, Employee, Shift
+from .metrics_view import MetricsView
 
 class ScheduleView(QWidget):
     def __init__(self):
@@ -21,13 +22,20 @@ class ScheduleView(QWidget):
         controls_layout.addStretch()
         self.layout.addLayout(controls_layout)
         
+        # Splitter for Grid and Charts
+        self.splitter = QSplitter(Qt.Orientation.Vertical)
+        self.layout.addWidget(self.splitter)
+        
         # Schedule Grid
         self.grid = QTableWidget()
-        self.layout.addWidget(self.grid)
+        self.splitter.addWidget(self.grid)
         
-        # Legend
-        self.legend_layout = QHBoxLayout()
-        self.layout.addLayout(self.legend_layout)
+        # Metrics View
+        self.metrics = MetricsView()
+        self.splitter.addWidget(self.metrics)
+        
+        # Set initial sizes (60% grid, 40% charts)
+        self.splitter.setSizes([600, 400])
         
         self.refresh_runs()
 
@@ -48,6 +56,9 @@ class ScheduleView(QWidget):
         run_id = self.combo_runs.currentData()
         if not run_id:
             return
+            
+        # Update Metrics
+        self.metrics.update_metrics(run_id)
             
         db = SessionLocal()
         try:

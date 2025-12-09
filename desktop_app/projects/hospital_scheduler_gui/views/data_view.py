@@ -1,10 +1,13 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem, 
                              QHeaderView, QTabWidget, QPushButton, QHBoxLayout, QMessageBox)
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from hospital_scheduler.app.database import SessionLocal
 from hospital_scheduler.app.models import Employee, Shift
+from hospital_scheduler.seed import seed_data
 
 class DataView(QWidget):
+    data_changed = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
@@ -22,12 +25,38 @@ class DataView(QWidget):
         self.setup_shifts_tab()
         self.tabs.addTab(self.tab_shifts, "Shifts")
         
+        # Buttons Layout
+        btn_layout = QHBoxLayout()
+        
         # Refresh Button
         self.btn_refresh = QPushButton("Refresh Data")
         self.btn_refresh.clicked.connect(self.load_data)
-        self.layout.addWidget(self.btn_refresh)
+        btn_layout.addWidget(self.btn_refresh)
+        
+        # Seed Button
+        self.btn_seed = QPushButton("Seed Database (Reset)")
+        self.btn_seed.setStyleSheet("background-color: #f59e0b; color: white; font-weight: bold;")
+        self.btn_seed.clicked.connect(self.run_seed)
+        btn_layout.addWidget(self.btn_seed)
+        
+        self.layout.addLayout(btn_layout)
         
         self.load_data()
+
+    def run_seed(self):
+        reply = QMessageBox.question(self, 'Seed Database', 
+                                     "This will DELETE ALL EXISTING DATA and repopulate with sample data. Continue?",
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, 
+                                     QMessageBox.StandardButton.No)
+
+        if reply == QMessageBox.StandardButton.Yes:
+            success, msg = seed_data()
+            if success:
+                QMessageBox.information(self, "Success", msg)
+                self.load_data()
+                self.data_changed.emit()
+            else:
+                QMessageBox.critical(self, "Error", f"Failed to seed: {msg}")
 
     def setup_employees_tab(self):
         layout = QVBoxLayout(self.tab_employees)
