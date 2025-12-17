@@ -11,6 +11,7 @@ sys.path.append(project_root)
 
 # Import project modules
 from desktop_app.projects.hospital_scheduler_gui.main_window import HospitalSchedulerWindow
+from desktop_app.projects.saisonier_production.main_window import SaisonierProductionWindow
 
 class LauncherWindow(QMainWindow):
     def __init__(self):
@@ -84,10 +85,10 @@ class LauncherWindow(QMainWindow):
         self.btn_project1.clicked.connect(self.launch_hospital_scheduler)
         self.btn_project1.setFixedSize(300, 150)
         
-        # Project 2: Placeholder
-        self.btn_project2 = QPushButton("📦  Project 2\n\nComing Soon...")
+        # Project 2: Optimisation de la Production avec Demande Saisonnière
+        self.btn_project2 = QPushButton("📦  Optimisation de la Production avec Demande Saisonnière")
         self.btn_project2.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_project2.setEnabled(False)
+        self.btn_project2.clicked.connect(self.launch_saisonier_production)
         self.btn_project2.setFixedSize(300, 150)
 
         # Project 3: Placeholder
@@ -114,6 +115,10 @@ class LauncherWindow(QMainWindow):
         self.hospital_window.show()
         # Optional: Hide launcher or keep it open
         # self.hide()
+
+    def launch_saisonier_production(self):
+        self.saisonier_window = SaisonierProductionWindow()
+        self.saisonier_window.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
