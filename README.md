@@ -4,7 +4,7 @@ This repository contains **four sub-projects** developed as part of an Operation
 Each team member tackled a different subject from the provided list:
 
 -   Hospital Scheduler by Yassine Krichen
--   Subject X
+-   Equilibrage_chaine_traitement_dossiers By Firas Guizani
 -   Subject X
 -   Subject X
 
@@ -12,7 +12,7 @@ This repository groups all deliverables in one place.
 
 ---
 
-# 📂 Project Overview
+# 📂 Project Overview   
 
 The repository contains the following sub-projects:
 
