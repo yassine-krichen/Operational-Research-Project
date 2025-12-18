@@ -326,7 +326,18 @@ class MainWindow(QMainWindow):
                 border-radius: 10px;
                 selection-background-color: rgba(37, 99, 235, 0.1);
                 selection-color: #111827;
+                color: #111827;
                 padding: 5px;
+            }
+            
+            QComboBox QAbstractItemView::item {
+                color: #111827;
+                padding: 8px;
+                min-height: 25px;
+            }
+            
+            QComboBox QAbstractItemView::item:hover {
+                background-color: rgba(37, 99, 235, 0.1);
             }
             
             /* TextEdit épuré */
