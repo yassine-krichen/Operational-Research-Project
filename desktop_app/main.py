@@ -12,6 +12,8 @@ sys.path.append(project_root)
 # Import project modules
 from desktop_app.projects.hospital_scheduler_gui.main_window import HospitalSchedulerWindow
 from desktop_app.projects.saisonier_production.main_window import SaisonierProductionWindow
+from desktop_app.projects.Equilibrage_chaine_traitement_dossiers.main_window import TransportWindow
+
 
 class LauncherWindow(QMainWindow):
     def __init__(self):
@@ -92,9 +94,9 @@ class LauncherWindow(QMainWindow):
         self.btn_project2.setFixedSize(300, 150)
 
         # Project 3: Placeholder
-        self.btn_project3 = QPushButton("🚚  Project 3\n\nComing Soon...")
+        self.btn_project3 = QPushButton("🚚Flux Dossiers\nOptimisation")
         self.btn_project3.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_project3.setEnabled(False)
+        self.btn_project3.clicked.connect(self.launch_flux_dossiers)
         self.btn_project3.setFixedSize(300, 150)
 
         # Project 4: Placeholder
@@ -119,6 +121,10 @@ class LauncherWindow(QMainWindow):
     def launch_saisonier_production(self):
         self.saisonier_window = SaisonierProductionWindow()
         self.saisonier_window.show()
+
+    def launch_flux_dossiers(self):
+        self.transport_window = TransportWindow()
+        self.transport_window.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
