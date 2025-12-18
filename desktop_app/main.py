@@ -14,6 +14,7 @@ from desktop_app.projects.hospital_scheduler_gui.main_window import HospitalSche
 from desktop_app.projects.saisonier_production.main_window import SaisonierProductionWindow
 from desktop_app.projects.Equilibrage_chaine_traitement_dossiers.main_window import MainWindow as EquilibrageWindow
 
+
 class LauncherWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -124,6 +125,7 @@ class LauncherWindow(QMainWindow):
     def launch_equilibrage(self):
         self.equilibrage_window = EquilibrageWindow()
         self.equilibrage_window.show()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
