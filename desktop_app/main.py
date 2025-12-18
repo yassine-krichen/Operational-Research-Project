@@ -13,6 +13,7 @@ sys.path.append(project_root)
 from desktop_app.projects.hospital_scheduler_gui.main_window import HospitalSchedulerWindow
 from desktop_app.projects.saisonier_production.main_window import SaisonierProductionWindow
 from desktop_app.projects.Equilibrage_chaine_traitement_dossiers.main_window import MainWindow as EquilibrageWindow
+from desktop_app.projects.routage_inspection.main_window import RoutageInspectionWindow
 
 
 class LauncherWindow(QMainWindow):
@@ -99,10 +100,10 @@ class LauncherWindow(QMainWindow):
         self.btn_project3.clicked.connect(self.launch_equilibrage)
         self.btn_project3.setFixedSize(300, 150)
 
-        # Project 4: Placeholder
-        self.btn_project4 = QPushButton("⚡  Project 4\n\nComing Soon...")
+        # Project 4: Routage & Inspection Tasks Scheduling
+        self.btn_project4 = QPushButton("🚗  Routage & Inspection Tasks\n\nOptimal routing with Gurobi MILP")
         self.btn_project4.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_project4.setEnabled(False)
+        self.btn_project4.clicked.connect(self.launch_routage_inspection)
         self.btn_project4.setFixedSize(300, 150)
 
         grid_layout.addWidget(self.btn_project1, 0, 0)
@@ -125,6 +126,10 @@ class LauncherWindow(QMainWindow):
     def launch_equilibrage(self):
         self.equilibrage_window = EquilibrageWindow()
         self.equilibrage_window.show()
+
+    def launch_routage_inspection(self):
+        self.routage_window = RoutageInspectionWindow()
+        self.routage_window.show()
 
 
 if __name__ == "__main__":
