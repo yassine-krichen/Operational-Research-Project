@@ -3,10 +3,11 @@
 This repository contains **four sub-projects** developed as part of an Operational Research assignment.
 Each team member tackled a different subject from the provided list:
 
--   Hospital Scheduler by Yassine Krichen
--   Equilibrage_chaine_traitement_dossiers By Firas Guizani
--   Subject X
--   Subject X
+-   Optimisation de Planning Hospitalier - Yassine Krichen
+-   Optimisation de Flux de Traitement de Dossiers - Firas Guizani
+-   Optimisation de la Production avec Demande Saisonniere - Seifeddine Amiri
+-   Planification des Inspections de Sécurité et de Qualité - Akram Zaabi
+-   Optimisation de Gamme - Mohamed Aziz Kchaou
 
 This repository groups all deliverables in one place.
 

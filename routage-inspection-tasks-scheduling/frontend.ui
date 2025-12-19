@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Inspection Routing</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="topRow">
+      <item>
+       <widget class="QPushButton" name="btnLoadData">
+        <property name="text">
+         <string>Load Data</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSolve">
+        <property name="text">
+         <string>Solve (Gurobi)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnShowRoutes">
+        <property name="text">
+         <string>Show Routes</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblStatus">
+        <property name="text">
+         <string>Status: idle</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTableWidget" name="tableAssignments">
+      <property name="columnCount">
+       <number>3</number>
+      </property>
+      <property name="rowCount">
+       <number>0</number>
+      </property>
+      <column>
+       <property name="text">
+        <string>Inspector</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Assigned Sites (route)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Travel Time (h)</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGraphicsView" name="mapView">
+      <property name="minimumHeight">
+       <number>300</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar"/>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
